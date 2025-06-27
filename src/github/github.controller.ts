@@ -23,8 +23,8 @@ export class GithubController {
   @ApiQuery({ name: 'language', required: false })
   @ApiResponse({ status: 200, description: 'List of GitHub users' })
   async find(@Query() query: FilterUserDto): Promise<any> {
-    const { location, language } = query;
+    const { location, language, page, limit } = query;
 
-    return this.githubService.findUsers(location, language);
+    return this.githubService.findUsers(location, language, page, limit);
   }
 }
