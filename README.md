@@ -2,6 +2,8 @@
 
 This is the backend application for the **DocBay** coding challenge. Built using [NestJS](https://nestjs.com/) and [Prisma ORM](https://www.prisma.io/). It fetches user data from the GitHub API, stores it locally, and exposes endpoints for listing and filtering users.
 
+For more details of the [Frontend docbay](https://github.com/ThyagOliveira/frontend-docbay) aplication
+
 ---
 
 ## Technologies
