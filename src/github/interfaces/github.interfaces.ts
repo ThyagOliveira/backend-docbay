@@ -1,3 +1,5 @@
+import { User } from '@prisma/client';
+
 export interface IGitHubUser {
   id: number;
   login: string;
@@ -6,7 +8,7 @@ export interface IGitHubUser {
   location?: string;
   bio?: string;
   avatar_url?: string;
-  url?: string;
+  html_url?: string;
   blog?: string;
 }
 
@@ -19,4 +21,18 @@ export interface IUserPayload {
   url?: string;
   blog?: string;
   languages: string[];
+}
+
+interface PaginationMeta {
+  total: number;
+  perPage: number;
+  currentPage: number;
+  lastPage: number;
+  prev: number | null;
+  next: number | null;
+}
+
+export interface PaginatedUsers {
+  data: User[];
+  meta: PaginationMeta;
 }

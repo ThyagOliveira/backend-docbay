@@ -9,7 +9,11 @@ import { Logger } from '@nestjs/common';
 import { catchError, firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { User } from '@prisma/client';
-import { IGitHubUser, IUserPayload } from './interfaces/github.interfaces';
+import {
+  IGitHubUser,
+  IUserPayload,
+  PaginatedUsers,
+} from './interfaces/github.interfaces';
 
 @Injectable()
 export class GithubService {
@@ -65,7 +69,7 @@ export class GithubService {
       location: userData.location,
       bio: userData.bio,
       avatarUrl: userData.avatar_url,
-      url: userData.url,
+      url: userData.html_url,
       blog: userData.blog,
       languages: Array.from(languages),
     };
@@ -82,14 +86,46 @@ export class GithubService {
     return createdUser;
   }
 
-  async findUsers(location?: string, language?: string): Promise<any> {
-    return await this.prisma.user.findMany({
-      where: {
-        location: location
-          ? { contains: location, mode: 'insensitive' }
-          : undefined,
-        languages: language ? { has: language } : undefined,
+  async findUsers(
+    location?: string,
+    language?: string,
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedUsers> {
+    const skip = (page - 1) * limit;
+
+    const whereFilter = {
+      location: location
+        ? { contains: location, mode: 'insensitive' as const }
+        : undefined,
+      languages: language ? { has: language } : undefined,
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        where: whereFilter,
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.user.count({ where: whereFilter }),
+    ]);
+
+    const lastPage = Math.ceil(total / limit);
+    const currentPage = page;
+    const prev = currentPage > 1 ? currentPage - 1 : null;
+    const next = currentPage < lastPage ? currentPage + 1 : null;
+
+    return {
+      data,
+      meta: {
+        total,
+        currentPage: page,
+        perPage: limit,
+        lastPage,
+        prev,
+        next,
       },
-    });
+    };
   }
 }
